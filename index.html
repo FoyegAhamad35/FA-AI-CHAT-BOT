@@ -11,7 +11,7 @@
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
 html,body{height:100%;overflow:hidden;background:#0f172a;color:#e5e7eb}
 .app{display:flex;height:100dvh;background:linear-gradient(135deg,#0f172a,#111827,#020617)}
-.sidebar{width:300px;background:#0f172a;border-right:1px solid #334155;display:flex;flex-direction:column;padding:14px;gap:12px;z-index:50}
+.sidebar{width:300px;background:#0f172a;border-right:1px solid #334155;display:flex;flex-direction:column;padding:14px;gap:12px;z-index:50;overflow-y:auto}
 .brand{font-size:19px;font-weight:900;color:#93c5fd}
 button,input,textarea,select{font:inherit}
 .new-chat,.send-btn{background:linear-gradient(135deg,#2563eb,#8b5cf6);color:white}
@@ -48,6 +48,8 @@ button,input,textarea,select{font:inherit}
 .bubble code{background:#020617;color:#93c5fd;padding:2px 6px;border-radius:6px}
 .msg-actions{display:flex;gap:7px;margin-top:8px;flex-wrap:wrap}
 .msg-actions button{border:0;background:#1e3a8a;color:#93c5fd;padding:8px 12px;border-radius:11px;font-weight:900}
+.voice-icon-btn{min-width:44px}
+.voice-icon-btn.speaking{background:#ef4444!important;color:white!important;box-shadow:0 0 18px #ef444488}
 .typing-loader span{display:inline-block;width:8px;height:8px;background:#a78bfa;border-radius:50%;margin:0 3px;animation:b 1s infinite}
 .typing-loader span:nth-child(2){animation-delay:.15s}.typing-loader span:nth-child(3){animation-delay:.3s}
 @keyframes b{0%,80%,100%{opacity:.4;transform:scale(.7)}40%{opacity:1;transform:scale(1.2)}}
@@ -125,13 +127,14 @@ button,input,textarea,select{font:inherit}
 </div>
 
 <script>
-const STORAGE_CHATS="fa_ai_chats_phase8_stable";
-const STORAGE_SETTINGS="fa_ai_settings_phase8_stable";
-const STORAGE_THEME="fa_ai_theme_phase8_stable";
-const STORAGE_AUTO_VOICE="fa_ai_auto_voice_phase8_stable";
+const STORAGE_CHATS="fa_ai_chats_phase85_stable";
+const STORAGE_SETTINGS="fa_ai_settings_phase85_stable";
+const STORAGE_THEME="fa_ai_theme_phase85_stable";
+const STORAGE_AUTO_VOICE="fa_ai_auto_voice_phase85_stable";
 
 let chats=[],currentChatId=null,isLoading=false,stopTyping=false,recognition=null,isListening=false;
 let autoVoice=localStorage.getItem(STORAGE_AUTO_VOICE)==="1";
+let speakingIndex=null;
 
 const $=id=>document.getElementById(id);
 const chatArea=$("chatArea"),chatList=$("chatList"),messageInput=$("messageInput"),sendBtn=$("sendBtn"),stopBtn=$("stopBtn"),micBtn=$("micBtn"),readLastBtn=$("readLastBtn"),sidebar=$("sidebar");
@@ -205,12 +208,12 @@ c.messages.forEach((m,i)=>{
 let div=document.createElement("div");
 div.className="message "+m.role;
 let content=m.content==="__LOADING__"?'<div class="typing-loader"><span></span><span></span><span></span></div>':(m.role==="assistant"?markdownToHtml(m.content):escapeHtml(m.content));
-let actions=m.content==="__LOADING__"?"":`<div class="msg-actions">${m.role==="assistant"?`<button data-copy="${i}">📋 Copy</button><button data-speak="${i}">🔊 Speak</button><button data-regen="${i}">↻ Regenerate</button>`:`<button data-edit="${i}">✎ Edit</button>`}</div>`;
+let actions=m.content==="__LOADING__"?"":`<div class="msg-actions">${m.role==="assistant"?`<button data-copy="${i}">📋 Copy</button><button class="voice-icon-btn ${speakingIndex===i?'speaking':''}" data-voice="${i}">${speakingIndex===i?'🔇':'🔊'}</button><button data-regen="${i}">↻ Regenerate</button>`:`<button data-edit="${i}">✎ Edit</button>`}</div>`;
 div.innerHTML=`<div class="avatar">${m.role==="user"?"U":"AI"}</div><div class="bubble-wrap"><div class="bubble">${content}</div><div class="time">${m.time||""}</div>${actions}</div>`;
 chatArea.appendChild(div);
 });
 document.querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>navigator.clipboard.writeText(c.messages[b.dataset.copy].content));
-document.querySelectorAll("[data-speak]").forEach(b=>b.onclick=()=>speakText(c.messages[b.dataset.speak].content));
+document.querySelectorAll("[data-voice]").forEach(b=>b.onclick=()=>toggleSpeak(Number(b.dataset.voice)));
 document.querySelectorAll("[data-regen]").forEach(b=>b.onclick=()=>regenerate(Number(b.dataset.regen)));
 document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>editMsg(Number(b.dataset.edit)));
 scrollBottom();
@@ -271,7 +274,10 @@ if(i%3===0){saveChats();renderMessages()}
 await new Promise(r=>setTimeout(r,7));
 }
 saveChats();renderMessages();
-if(autoVoice&&!stopTyping)speakText(text);
+if(autoVoice&&!stopTyping){
+let index=getCurrentChat().messages.length-1;
+startSpeak(text,index);
+}
 }
 
 async function callAI(s){
@@ -334,21 +340,50 @@ function cleanSpeak(t){
 return t.replace(/```[\s\S]*?```/g," code block omitted ").replace(/[#*_`>-]/g," ").replace(/\s+/g," ").trim();
 }
 
-function speakText(t){
+function startSpeak(text,index){
 if(!("speechSynthesis" in window)){alert("Voice reply not supported.");return}
 let s=loadSettings();
 speechSynthesis.cancel();
-let u=new SpeechSynthesisUtterance(cleanSpeak(t));
+speakingIndex=index;
+renderMessages();
+
+let u=new SpeechSynthesisUtterance(cleanSpeak(text));
 u.lang=s.voiceLang;
 u.rate=Number(s.voiceRate)||1;
 u.pitch=1;
+
+u.onend=()=>{speakingIndex=null;renderMessages()};
+u.onerror=()=>{speakingIndex=null;renderMessages()};
+
 speechSynthesis.speak(u);
+}
+
+function stopSpeak(){
+speechSynthesis.cancel();
+speakingIndex=null;
+renderMessages();
+}
+
+function toggleSpeak(index){
+let c=getCurrentChat();
+let msg=c.messages[index];
+if(speakingIndex===index){
+stopSpeak();
+}else{
+startSpeak(msg.content,index);
+}
 }
 
 function speakLast(){
 let c=getCurrentChat();
-let m=[...c.messages].reverse().find(x=>x.role==="assistant"&&x.content!=="__LOADING__");
-if(m)speakText(m.content);else alert("No AI reply.");
+let lastIndex=-1;
+for(let i=c.messages.length-1;i>=0;i--){
+if(c.messages[i].role==="assistant"&&c.messages[i].content!=="__LOADING__"){
+lastIndex=i;
+break;
+}
+}
+if(lastIndex>=0)toggleSpeak(lastIndex);else alert("No AI reply.");
 }
 
 function setupVoice(){
@@ -383,7 +418,7 @@ sendBtn.onclick=sendMessage;
 
 stopBtn.onclick=()=>{
 stopTyping=true;
-speechSynthesis.cancel();
+stopSpeak();
 let c=getCurrentChat();
 if(c&&c.messages.length){
 let last=c.messages[c.messages.length-1];
@@ -405,7 +440,7 @@ $("closeSettingsBtn").onclick=()=>settingsModal.classList.remove("active");
 $("saveSettingsBtn").onclick=saveSettings;
 $("themeBtn").onclick=()=>{document.body.classList.toggle("light");localStorage.setItem(STORAGE_THEME,document.body.classList.contains("light")?"light":"dark")};
 $("voiceToggleBtn").onclick=()=>{autoVoice=!autoVoice;localStorage.setItem(STORAGE_AUTO_VOICE,autoVoice?"1":"0");updateVoiceBtn()};
-$("stopVoiceBtn").onclick=()=>speechSynthesis.cancel();
+$("stopVoiceBtn").onclick=stopSpeak;
 readLastBtn.onclick=speakLast;
 $("renameBtn").onclick=()=>{let c=getCurrentChat(),n=prompt("New chat name:",c.title);if(n&&n.trim()){c.title=n.trim();saveChats();renderAll()}};
 $("clearBtn").onclick=()=>{if(!confirm("Clear current chat?"))return;let c=getCurrentChat();c.messages=[];c.title="New Chat";saveChats();renderAll()};
