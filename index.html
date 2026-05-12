@@ -4,58 +4,79 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>FA AI Chat Bot</title>
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
 html,body{height:100%;overflow:hidden;background:#f7f9fc;color:#111827}
 .app{display:flex;height:100dvh;width:100%}
-.sidebar{width:280px;background:#eef3f9;border-right:1px solid #d9e2ef;display:flex;flex-direction:column;padding:14px;gap:12px}
-.brand{font-size:18px;font-weight:800;color:#2563eb;padding:8px 4px}
-.new-chat{border:0;background:#dbeafe;color:#1d4ed8;padding:13px;border-radius:16px;font-weight:700;text-align:left}
+
+.sidebar{width:290px;background:#eef3f9;border-right:1px solid #d9e2ef;display:flex;flex-direction:column;padding:14px;gap:12px}
+.brand{font-size:18px;font-weight:900;color:#2563eb;padding:8px 4px}
+.new-chat{border:0;background:#dbeafe;color:#1d4ed8;padding:13px;border-radius:16px;font-weight:800;text-align:left}
+.chat-tools{display:flex;gap:8px}
+.tool-btn{flex:1;border:0;background:#fff;color:#374151;padding:10px;border-radius:12px;font-weight:700}
 .chat-list{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px}
 .chat-item{padding:11px;border-radius:12px;cursor:pointer;font-size:14px;color:#374151;display:flex;justify-content:space-between;gap:8px}
-.chat-item.active{background:#fff;color:#2563eb;font-weight:700;box-shadow:0 2px 8px #0001}
-.delete-btn{border:0;background:transparent;color:#ef4444;font-size:16px}
+.chat-item.active{background:#fff;color:#2563eb;font-weight:800;box-shadow:0 2px 8px #0001}
+.delete-btn{border:0;background:transparent;color:#ef4444;font-size:17px}
 .side-bottom{border-top:1px solid #d9e2ef;padding-top:12px;display:flex;flex-direction:column;gap:8px}
-.side-action{border:0;background:transparent;color:#374151;padding:10px;text-align:left;border-radius:10px;font-weight:600}
+.side-action{border:0;background:transparent;color:#374151;padding:10px;text-align:left;border-radius:10px;font-weight:700}
+
 .main{flex:1;display:flex;flex-direction:column;height:100dvh}
 .topbar{height:60px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:#fff}
 .menu-btn{display:none;border:0;background:#eef3f9;border-radius:12px;padding:10px 14px;font-size:22px}
-.top-title{font-weight:800}
-.chat-area{flex:1;overflow-y:auto;padding:22px 14px 110px}
+.top-title{font-weight:900}
+.status-dot{font-size:12px;color:#22c55e;font-weight:800}
+
+.chat-area{flex:1;overflow-y:auto;padding:24px 14px 120px;scroll-behavior:smooth}
 .welcome{height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;color:#6b7280;gap:10px}
-.logo{width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#60a5fa,#a855f7)}
+.logo{width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,#60a5fa,#a855f7);box-shadow:0 12px 35px #6366f155}
 .welcome h1{font-size:34px;background:linear-gradient(135deg,#2563eb,#9333ea);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.message{max-width:850px;margin:0 auto 18px;display:flex;gap:12px;align-items:flex-start}
+
+.message{max-width:880px;margin:0 auto 20px;display:flex;gap:12px;align-items:flex-start}
 .message.user{flex-direction:row-reverse}
-.avatar{width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0}
+.avatar{width:38px;height:38px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-weight:900;flex-shrink:0}
 .user .avatar{background:#dbeafe;color:#2563eb}
 .assistant .avatar{background:#ede9fe;color:#7c3aed}
-.bubble-wrap{max-width:85%}
-.bubble{background:#fff;padding:14px 16px;border-radius:18px;line-height:1.65;box-shadow:0 2px 10px #0001;font-size:16px;overflow-wrap:anywhere}
-.bubble p{margin-bottom:10px}
-.bubble strong{font-weight:800}
-.bubble code{background:#eef2ff;color:#1d4ed8;padding:2px 6px;border-radius:6px;font-size:14px}
-.bubble pre{background:#0f172a;color:#e5e7eb;padding:14px;border-radius:14px;overflow:auto;margin:10px 0;white-space:pre}
-.bubble pre code{background:transparent;color:inherit;padding:0}
+.bubble-wrap{max-width:86%}
+.bubble{background:#fff;padding:15px 17px;border-radius:20px;line-height:1.7;box-shadow:0 8px 26px #00000010;font-size:16px;overflow-wrap:anywhere}
 .user .bubble{background:#2563eb;color:white}
-.copy-btn{margin-top:6px;border:0;background:#eef2ff;color:#2563eb;padding:6px 10px;border-radius:10px;font-size:12px;font-weight:700}
-.composer-wrap{position:fixed;bottom:0;left:280px;right:0;background:#fff;border-top:1px solid #e5e7eb;padding:10px 14px calc(10px + env(safe-area-inset-bottom));z-index:20}
-.composer{max-width:900px;margin:0 auto;display:flex;gap:10px;align-items:center;background:#f1f5f9;border-radius:20px;padding:8px 8px 8px 16px}
-#messageInput{flex:1;border:0;background:transparent;outline:0;font-size:16px;min-height:42px}
-.send-btn{border:0;width:46px;height:46px;border-radius:16px;background:#2563eb;color:#fff;font-size:22px;font-weight:800}
+.bubble p{margin-bottom:10px}
+.bubble strong{font-weight:900}
+.bubble ul,.bubble ol{padding-left:22px;margin:8px 0}
+.bubble li{margin:5px 0}
+.bubble blockquote{border-left:4px solid #60a5fa;padding-left:10px;color:#64748b;margin:10px 0}
+.bubble code{background:#eef2ff;color:#1d4ed8;padding:2px 6px;border-radius:6px;font-size:14px}
+.bubble pre{background:#0f172a;color:#e5e7eb;padding:14px;border-radius:14px;overflow:auto;margin:12px 0;white-space:pre}
+.bubble pre code{background:transparent;color:inherit;padding:0}
+.msg-actions{display:flex;gap:7px;margin-top:7px}
+.copy-btn,.regen-btn{border:0;background:#eef2ff;color:#2563eb;padding:7px 11px;border-radius:11px;font-size:12px;font-weight:800}
+
+.typing-loader{display:flex;gap:5px;align-items:center}
+.typing-loader span{width:7px;height:7px;border-radius:50%;background:#8b5cf6;animation:bounce 1s infinite}
+.typing-loader span:nth-child(2){animation-delay:.15s}
+.typing-loader span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,80%,100%{transform:scale(.7);opacity:.5}40%{transform:scale(1.2);opacity:1}}
+
+.composer-wrap{position:fixed;bottom:0;left:290px;right:0;background:#fff;border-top:1px solid #e5e7eb;padding:10px 14px calc(10px + env(safe-area-inset-bottom));z-index:20}
+.composer{max-width:920px;margin:0 auto;display:flex;gap:10px;align-items:center;background:#f1f5f9;border-radius:22px;padding:8px 8px 8px 16px}
+#messageInput{flex:1;border:0;background:transparent;outline:0;font-size:16px;min-height:44px}
+.send-btn{border:0;width:48px;height:48px;border-radius:17px;background:#2563eb;color:#fff;font-size:22px;font-weight:900}
 .note{text-align:center;color:#9ca3af;font-size:12px;margin-top:6px}
+
 .modal-backdrop{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;z-index:60;padding:16px}
 .modal-backdrop.active{display:flex}
-.modal{width:100%;max-width:480px;background:#fff;border-radius:22px;padding:22px}
-.modal h2{margin-bottom:16px}
+.modal{width:100%;max-width:480px;background:#fff;border-radius:24px;padding:22px;box-shadow:0 30px 90px #0005}
+.modal h2{margin-bottom:16px;font-size:28px}
 .field{margin-bottom:14px}
-.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px;color:#374151}
-.field input,.field textarea{width:100%;border:1px solid #e5e7eb;border-radius:12px;padding:12px;background:#f8fafc;outline:0;font-size:14px}
+.field label{display:block;font-size:13px;font-weight:800;margin-bottom:6px;color:#374151}
+.field input,.field textarea{width:100%;border:1px solid #e5e7eb;border-radius:14px;padding:13px;background:#f8fafc;outline:0;font-size:14px}
 .field textarea{height:95px}
 .modal-actions{display:flex;justify-content:flex-end;gap:10px}
-.btn{border:0;padding:11px 16px;border-radius:12px;font-weight:700}
+.btn{border:0;padding:12px 17px;border-radius:14px;font-weight:800}
 .btn-secondary{background:#e5e7eb}
 .btn-primary{background:#2563eb;color:white}
+
 .dark{background:#0f172a;color:#e5e7eb}
 .dark .main,.dark .topbar,.dark .composer-wrap{background:#0f172a;color:#e5e7eb;border-color:#1f2937}
 .dark .sidebar{background:#111827;border-color:#1f2937}
@@ -63,8 +84,11 @@ html,body{height:100%;overflow:hidden;background:#f7f9fc;color:#111827}
 .dark .composer{background:#1f2937}
 .dark #messageInput{color:#e5e7eb}
 .dark .field input,.dark .field textarea{background:#111827;color:#e5e7eb;border-color:#374151}
+.dark .tool-btn{background:#1f2937;color:#e5e7eb}
+.dark .new-chat{background:#1e3a8a;color:#dbeafe}
+
 @media(max-width:760px){
-.sidebar{position:fixed;left:-290px;top:0;bottom:0;z-index:40;transition:left .25s}
+.sidebar{position:fixed;left:-300px;top:0;bottom:0;z-index:40;transition:left .25s}
 .sidebar.open{left:0}
 .menu-btn{display:block}
 .composer-wrap{left:0}
@@ -72,15 +96,28 @@ html,body{height:100%;overflow:hidden;background:#f7f9fc;color:#111827}
 .bubble-wrap{max-width:88%}
 .bubble{font-size:15px}
 .welcome h1{font-size:28px}
+.status-dot{display:none}
 }
 </style>
 </head>
+
 <body>
 <div class="app">
 <aside class="sidebar" id="sidebar">
 <div class="brand">FA AI CHAT BOT</div>
 <button class="new-chat" id="newChatBtn">+ New Chat</button>
+
+<div class="chat-tools">
+<button class="tool-btn" id="renameBtn">Rename</button>
+<button class="tool-btn" id="clearBtn">Clear</button>
+</div>
+
+<div class="chat-tools">
+<button class="tool-btn" id="exportBtn">Export TXT</button>
+</div>
+
 <div class="chat-list" id="chatList"></div>
+
 <div class="side-bottom">
 <button class="side-action" id="settingsBtn">⚙️ Settings</button>
 <button class="side-action" id="darkBtn">🌙 Dark Mode</button>
@@ -91,9 +128,11 @@ html,body{height:100%;overflow:hidden;background:#f7f9fc;color:#111827}
 <header class="topbar">
 <button class="menu-btn" id="menuBtn">☰</button>
 <div class="top-title">Universal AI Interface</div>
-<div></div>
+<div class="status-dot">● Online</div>
 </header>
+
 <section class="chat-area" id="chatArea"></section>
+
 <div class="composer-wrap">
 <div class="composer">
 <input id="messageInput" type="text" placeholder="Ask anything..." />
@@ -107,18 +146,22 @@ html,body{height:100%;overflow:hidden;background:#f7f9fc;color:#111827}
 <div class="modal-backdrop" id="settingsModal">
 <div class="modal">
 <h2>⚙️ Settings</h2>
+
 <div class="field">
 <label>OpenRouter API Key</label>
 <input id="apiKeyInput" type="password" placeholder="sk-or-..." />
 </div>
+
 <div class="field">
 <label>Model ID</label>
 <input id="modelInput" value="deepseek/deepseek-r1:free" />
 </div>
+
 <div class="field">
 <label>System Prompt</label>
 <textarea id="systemPromptInput">You are a helpful AI assistant.</textarea>
 </div>
+
 <div class="modal-actions">
 <button class="btn btn-secondary" id="closeSettingsBtn">Cancel</button>
 <button class="btn btn-primary" id="saveSettingsBtn">Save</button>
@@ -127,9 +170,9 @@ html,body{height:100%;overflow:hidden;background:#f7f9fc;color:#111827}
 </div>
 
 <script>
-const STORAGE_CHATS="fa_ai_chats_v3";
-const STORAGE_SETTINGS="fa_ai_settings_v3";
-const STORAGE_DARK="fa_ai_dark_v3";
+const STORAGE_CHATS="fa_ai_chats_phase5";
+const STORAGE_SETTINGS="fa_ai_settings_phase5";
+const STORAGE_DARK="fa_ai_dark_phase5";
 
 const chatArea=document.getElementById("chatArea");
 const chatList=document.getElementById("chatList");
@@ -146,6 +189,9 @@ const modelInput=document.getElementById("modelInput");
 const systemPromptInput=document.getElementById("systemPromptInput");
 const closeSettingsBtn=document.getElementById("closeSettingsBtn");
 const saveSettingsBtn=document.getElementById("saveSettingsBtn");
+const renameBtn=document.getElementById("renameBtn");
+const clearBtn=document.getElementById("clearBtn");
+const exportBtn=document.getElementById("exportBtn");
 
 let chats=[];
 let currentChatId=null;
@@ -154,7 +200,7 @@ let isLoading=false;
 function uid(){return Date.now().toString()+Math.random().toString(16).slice(2)}
 function saveChats(){localStorage.setItem(STORAGE_CHATS,JSON.stringify(chats))}
 function getCurrentChat(){return chats.find(c=>c.id===currentChatId)}
-function scrollBottom(){setTimeout(()=>chatArea.scrollTop=chatArea.scrollHeight,50)}
+function scrollBottom(){setTimeout(()=>chatArea.scrollTop=chatArea.scrollHeight,40)}
 
 function escapeHtml(text){
 return String(text).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]));
@@ -167,12 +213,19 @@ safe=safe.replace(/```([\s\S]*?)```/g,function(_,code){
 return "<pre><code>"+code.trim()+"</code></pre>";
 });
 
-safe=safe.replace(/`([^`]+)`/g,"<code>$1</code>");
+safe=safe.replace(/^### (.*)$/gm,"<h3>$1</h3>");
+safe=safe.replace(/^## (.*)$/gm,"<h2>$1</h2>");
+safe=safe.replace(/^# (.*)$/gm,"<h1>$1</h1>");
 safe=safe.replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>");
 safe=safe.replace(/\*(.*?)\*/g,"<em>$1</em>");
+safe=safe.replace(/`([^`]+)`/g,"<code>$1</code>");
+safe=safe.replace(/^&gt; (.*)$/gm,"<blockquote>$1</blockquote>");
+safe=safe.replace(/^- (.*)$/gm,"<li>$1</li>");
+safe=safe.replace(/(<li>[\s\S]*?<\/li>)/g,"<ul>$1</ul>");
+safe=safe.replace(/<\/ul>\s*<ul>/g,"");
 
 safe=safe.split(/\n\s*\n/).map(block=>{
-if(block.startsWith("<pre>")) return block;
+if(block.includes("<pre>")||block.includes("<ul>")||block.includes("<h1>")||block.includes("<h2>")||block.includes("<h3>")||block.includes("<blockquote>")) return block;
 return "<p>"+block.replace(/\n/g,"<br>")+"</p>";
 }).join("");
 
@@ -216,7 +269,7 @@ else{currentChatId=chats[0].id;renderAll()}
 
 function makeTitle(t){
 t=t.trim().replace(/\s+/g," ");
-return t.length>28?t.slice(0,28)+"...":t||"New Chat";
+return t.length>30?t.slice(0,30)+"...":t||"New Chat";
 }
 
 function renderChatList(){
@@ -253,14 +306,24 @@ chat.messages.forEach((m,i)=>{
 const box=document.createElement("div");
 box.className="message "+m.role;
 
-const content=m.role==="assistant" ? markdownToHtml(m.content) : escapeHtml(m.content);
-const copy=m.role==="assistant"&&m.content!=="Typing..."?`<button class="copy-btn" data-copy="${i}">📋 Copy</button>`:"";
+let content="";
+if(m.content==="__LOADING__"){
+content=`<div class="typing-loader"><span></span><span></span><span></span></div>`;
+}else{
+content=m.role==="assistant"?markdownToHtml(m.content):escapeHtml(m.content);
+}
+
+const actions=m.role==="assistant"&&m.content!=="__LOADING__"?`
+<div class="msg-actions">
+<button class="copy-btn" data-copy="${i}">📋 Copy</button>
+<button class="regen-btn" data-regen="${i}">↻ Regenerate</button>
+</div>`:"";
 
 box.innerHTML=`
 <div class="avatar">${m.role==="user"?"U":"AI"}</div>
 <div class="bubble-wrap">
 <div class="bubble">${content}</div>
-${copy}
+${actions}
 </div>`;
 
 chatArea.appendChild(box);
@@ -268,6 +331,10 @@ chatArea.appendChild(box);
 
 document.querySelectorAll(".copy-btn").forEach(btn=>{
 btn.onclick=()=>navigator.clipboard.writeText(chat.messages[btn.dataset.copy].content);
+});
+
+document.querySelectorAll(".regen-btn").forEach(btn=>{
+btn.onclick=()=>regenerateResponse(Number(btn.dataset.regen));
 });
 
 scrollBottom();
@@ -293,7 +360,7 @@ renderMessages();
 for(let i=0;i<text.length;i++){
 msg.content+=text[i];
 if(i%3===0){saveChats();renderMessages()}
-await new Promise(r=>setTimeout(r,10));
+await new Promise(r=>setTimeout(r,8));
 }
 
 msg.content=text;
@@ -316,7 +383,7 @@ return;
 addMessage("user",text);
 messageInput.value="";
 isLoading=true;
-addMessage("assistant","Typing...");
+addMessage("assistant","__LOADING__");
 
 try{
 const reply=await callOpenRouter(settings);
@@ -331,11 +398,41 @@ isLoading=false;
 }
 }
 
+async function regenerateResponse(index){
+if(isLoading)return;
+const chat=getCurrentChat();
+if(!chat)return;
+
+let userIndex=-1;
+for(let i=index-1;i>=0;i--){
+if(chat.messages[i].role==="user"){userIndex=i;break}
+}
+if(userIndex===-1)return;
+
+chat.messages=chat.messages.slice(0,userIndex+1);
+saveChats();
+renderAll();
+
+isLoading=true;
+addMessage("assistant","__LOADING__");
+
+try{
+const reply=await callOpenRouter(loadSettings());
+await typeAssistantText(reply);
+}catch(e){
+chat.messages[chat.messages.length-1].content="Error: "+e.message;
+saveChats();
+renderAll();
+}finally{
+isLoading=false;
+}
+}
+
 async function callOpenRouter(settings){
 const chat=getCurrentChat();
 const messages=[
 {role:"system",content:settings.systemPrompt},
-...chat.messages.filter(m=>m.content!=="Typing...").map(m=>({role:m.role,content:m.content}))
+...chat.messages.filter(m=>m.content!=="__LOADING__").map(m=>({role:m.role,content:m.content}))
 ];
 
 const res=await fetch("https://openrouter.ai/api/v1/chat/completions",{
@@ -350,15 +447,56 @@ body:JSON.stringify({
 model:settings.model,
 messages,
 temperature:.7,
-max_tokens:1200
+max_tokens:1400
 })
 });
 
 const data=await res.json();
-
 if(!res.ok)throw new Error(data.error?.message||"API request failed.");
-
 return data.choices?.[0]?.message?.content||"No response received.";
+}
+
+function renameCurrentChat(){
+const chat=getCurrentChat();
+if(!chat)return;
+const name=prompt("New chat name:",chat.title);
+if(name&&name.trim()){
+chat.title=name.trim();
+saveChats();
+renderAll();
+}
+}
+
+function clearCurrentChat(){
+const chat=getCurrentChat();
+if(!chat)return;
+if(confirm("Clear current chat?")){
+chat.messages=[];
+chat.title="New Chat";
+saveChats();
+renderAll();
+}
+}
+
+function exportCurrentChat(){
+const chat=getCurrentChat();
+if(!chat)return;
+
+let text="FA AI CHAT BOT EXPORT\n\n";
+text+="Title: "+chat.title+"\n";
+text+="Date: "+new Date().toLocaleString()+"\n\n";
+
+chat.messages.forEach(m=>{
+text+=m.role.toUpperCase()+":\n"+m.content+"\n\n";
+});
+
+const blob=new Blob([text],{type:"text/plain"});
+const url=URL.createObjectURL(blob);
+const a=document.createElement("a");
+a.href=url;
+a.download=(chat.title||"chat")+".txt";
+a.click();
+URL.revokeObjectURL(url);
 }
 
 sendBtn.onclick=sendMessage;
@@ -367,6 +505,9 @@ newChatBtn.onclick=createNewChat;
 settingsBtn.onclick=()=>{loadSettings();settingsModal.classList.add("active")};
 closeSettingsBtn.onclick=()=>settingsModal.classList.remove("active");
 saveSettingsBtn.onclick=saveSettings;
+renameBtn.onclick=renameCurrentChat;
+clearBtn.onclick=clearCurrentChat;
+exportBtn.onclick=exportCurrentChat;
 
 darkBtn.onclick=()=>{
 document.body.classList.toggle("dark");
