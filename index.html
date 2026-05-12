@@ -20,11 +20,11 @@ button,input,textarea,select{font:inherit}
 .search-box{background:#020617;color:white;border:1px solid #334155;border-radius:15px;padding:13px;outline:none}
 .chat-tools{display:flex;gap:8px}
 .tool-btn{flex:1;background:#1e293b;color:#e5e7eb}
-.chat-list{flex:1;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.chat-list{flex:1;min-height:80px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
 .chat-item{padding:13px;border-radius:15px;color:#cbd5e1;display:flex;justify-content:space-between;cursor:pointer}
 .chat-item.active{background:#1e3a8a;color:#93c5fd;font-weight:900}
 .delete-btn{background:transparent;border:0;color:#fb7185;font-size:20px}
-.side-bottom{border-top:1px solid #334155;padding-top:12px;display:flex;flex-direction:column;gap:8px}
+.side-bottom{border-top:1px solid #334155;padding-top:12px;display:flex;flex-direction:column;gap:8px;flex-shrink:0}
 .side-action{background:transparent;color:#e5e7eb;text-align:left}
 .main{flex:1;display:flex;flex-direction:column;height:100dvh}
 .topbar{height:62px;border-bottom:1px solid #334155;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:#0f172a}
@@ -40,7 +40,7 @@ button,input,textarea,select{font:inherit}
 .avatar{width:40px;height:40px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:900;flex-shrink:0}
 .user .avatar{background:#2563eb}
 .assistant .avatar{background:#7c3aed}
-.bubble-wrap{max-width:86%}
+.bubble-wrap{max-width:86%;position:relative}
 .bubble{background:#1e293b;border:1px solid #334155;padding:15px 17px;border-radius:20px;line-height:1.7;font-size:16px;overflow-wrap:anywhere}
 .user .bubble{background:linear-gradient(135deg,#2563eb,#1d4ed8)}
 .time{font-size:11px;color:#94a3b8;margin-top:5px}
@@ -48,8 +48,8 @@ button,input,textarea,select{font:inherit}
 .bubble code{background:#020617;color:#93c5fd;padding:2px 6px;border-radius:6px}
 .msg-actions{display:flex;gap:7px;margin-top:8px;flex-wrap:wrap}
 .msg-actions button{border:0;background:#1e3a8a;color:#93c5fd;padding:8px 12px;border-radius:11px;font-weight:900}
-.voice-icon-btn{min-width:44px}
-.voice-icon-btn.speaking{background:#ef4444!important;color:white!important;box-shadow:0 0 18px #ef444488}
+.floating-voice-btn{position:absolute;top:-16px;right:-12px;width:40px;height:40px;border-radius:50%;border:1px solid #334155;background:#111827;color:white;display:flex;align-items:center;justify-content:center;font-size:19px;box-shadow:0 8px 25px rgba(0,0,0,.35);cursor:pointer;z-index:5}
+.floating-voice-btn.speaking{background:#ef4444!important;color:white!important;box-shadow:0 0 22px rgba(239,68,68,.65)}
 .typing-loader span{display:inline-block;width:8px;height:8px;background:#a78bfa;border-radius:50%;margin:0 3px;animation:b 1s infinite}
 .typing-loader span:nth-child(2){animation-delay:.15s}.typing-loader span:nth-child(3){animation-delay:.3s}
 @keyframes b{0%,80%,100%{opacity:.4;transform:scale(.7)}40%{opacity:1;transform:scale(1.2)}}
@@ -127,10 +127,10 @@ button,input,textarea,select{font:inherit}
 </div>
 
 <script>
-const STORAGE_CHATS="fa_ai_chats_phase85_stable";
-const STORAGE_SETTINGS="fa_ai_settings_phase85_stable";
-const STORAGE_THEME="fa_ai_theme_phase85_stable";
-const STORAGE_AUTO_VOICE="fa_ai_auto_voice_phase85_stable";
+const STORAGE_CHATS="fa_ai_chats_floating_voice";
+const STORAGE_SETTINGS="fa_ai_settings_floating_voice";
+const STORAGE_THEME="fa_ai_theme_floating_voice";
+const STORAGE_AUTO_VOICE="fa_ai_auto_voice_floating_voice";
 
 let chats=[],currentChatId=null,isLoading=false,stopTyping=false,recognition=null,isListening=false;
 let autoVoice=localStorage.getItem(STORAGE_AUTO_VOICE)==="1";
@@ -208,7 +208,7 @@ c.messages.forEach((m,i)=>{
 let div=document.createElement("div");
 div.className="message "+m.role;
 let content=m.content==="__LOADING__"?'<div class="typing-loader"><span></span><span></span><span></span></div>':(m.role==="assistant"?markdownToHtml(m.content):escapeHtml(m.content));
-let actions=m.content==="__LOADING__"?"":`<div class="msg-actions">${m.role==="assistant"?`<button data-copy="${i}">📋 Copy</button><button class="voice-icon-btn ${speakingIndex===i?'speaking':''}" data-voice="${i}">${speakingIndex===i?'🔇':'🔊'}</button><button data-regen="${i}">↻ Regenerate</button>`:`<button data-edit="${i}">✎ Edit</button>`}</div>`;
+let actions=m.content==="__LOADING__"?"":`<div class="msg-actions">${m.role==="assistant"?`<button data-copy="${i}">📋 Copy</button><button data-regen="${i}">↻ Regenerate</button><button class="floating-voice-btn ${speakingIndex===i?'speaking':''}" data-voice="${i}">${speakingIndex===i?'🔇':'🔊'}</button>`:`<button data-edit="${i}">✎ Edit</button>`}</div>`;
 div.innerHTML=`<div class="avatar">${m.role==="user"?"U":"AI"}</div><div class="bubble-wrap"><div class="bubble">${content}</div><div class="time">${m.time||""}</div>${actions}</div>`;
 chatArea.appendChild(div);
 });
