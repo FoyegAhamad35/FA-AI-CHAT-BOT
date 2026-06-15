@@ -1,474 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>FA AI Chat Bot</title>
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0b1020">
-
-<style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
-html,body{height:100%;overflow:hidden;background:#0f172a;color:#e5e7eb}
-.app{display:flex;height:100dvh;background:linear-gradient(135deg,#0f172a,#111827,#020617)}
-.sidebar{width:300px;background:#0f172a;border-right:1px solid #334155;display:flex;flex-direction:column;padding:14px;gap:12px;z-index:50;overflow-y:auto}
-.brand{font-size:19px;font-weight:900;color:#93c5fd}
-button,input,textarea,select{font:inherit}
-.new-chat,.send-btn{background:linear-gradient(135deg,#2563eb,#8b5cf6);color:white}
-.new-chat,.tool-btn,.side-action{border:1px solid #334155;border-radius:15px;padding:13px;font-weight:900;cursor:pointer}
-.new-chat{text-align:left;border:0}
-.search-box{background:#020617;color:white;border:1px solid #334155;border-radius:15px;padding:13px;outline:none}
-.chat-tools{display:flex;gap:8px}
-.tool-btn{flex:1;background:#1e293b;color:#e5e7eb}
-.chat-list{flex:1;min-height:80px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
-.chat-item{padding:13px;border-radius:15px;color:#cbd5e1;display:flex;justify-content:space-between;cursor:pointer}
-.chat-item.active{background:#1e3a8a;color:#93c5fd;font-weight:900}
-.delete-btn{background:transparent;border:0;color:#fb7185;font-size:20px}
-.side-bottom{border-top:1px solid #334155;padding-top:12px;display:flex;flex-direction:column;gap:8px;flex-shrink:0}
-.side-action{background:transparent;color:#e5e7eb;text-align:left}
-.main{flex:1;display:flex;flex-direction:column;height:100dvh}
-.topbar{height:62px;border-bottom:1px solid #334155;display:flex;align-items:center;justify-content:space-between;padding:0 18px;background:#0f172a}
-.menu-btn{display:none;background:#1e293b;color:white;border:0;border-radius:14px;padding:10px 15px;font-size:24px}
-.top-title{font-weight:900;font-size:19px}
-.model-badge{font-size:12px;color:#93c5fd;background:#1e3a8a;padding:7px 10px;border-radius:999px}
-.chat-area{flex:1;overflow-y:auto;padding:24px 14px 145px}
-.welcome{height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#94a3b8;text-align:center}
-.logo{width:75px;height:75px;border-radius:25px;background:linear-gradient(135deg,#38bdf8,#8b5cf6,#ec4899);box-shadow:0 0 45px #7c3aed}
-.welcome h1{font-size:35px;background:linear-gradient(135deg,#60a5fa,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.message{max-width:900px;margin:0 auto 22px;display:flex;gap:12px;align-items:flex-start}
-.message.user{flex-direction:row-reverse}
-.avatar{width:40px;height:40px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:900;flex-shrink:0}
-.user .avatar{background:#2563eb}
-.assistant .avatar{background:#7c3aed}
-.bubble-wrap{max-width:86%;position:relative}
-.bubble{background:#1e293b;border:1px solid #334155;padding:15px 17px;border-radius:20px;line-height:1.7;font-size:16px;overflow-wrap:anywhere}
-.user .bubble{background:linear-gradient(135deg,#2563eb,#1d4ed8)}
-.time{font-size:11px;color:#94a3b8;margin-top:5px}
-.bubble pre{background:#020617;padding:14px;border-radius:14px;overflow:auto;margin:10px 0}
-.bubble code{background:#020617;color:#93c5fd;padding:2px 6px;border-radius:6px}
-.msg-actions{display:flex;gap:7px;margin-top:8px;flex-wrap:wrap}
-.msg-actions button{border:0;background:#1e3a8a;color:#93c5fd;padding:8px 12px;border-radius:11px;font-weight:900}
-.floating-voice-btn{position:absolute;top:-16px;right:-12px;width:40px;height:40px;border-radius:50%;border:1px solid #334155;background:#111827;color:white;display:flex;align-items:center;justify-content:center;font-size:19px;box-shadow:0 8px 25px rgba(0,0,0,.35);cursor:pointer;z-index:5}
-.floating-voice-btn.speaking{background:#ef4444!important;color:white!important;box-shadow:0 0 22px rgba(239,68,68,.65)}
-.typing-loader span{display:inline-block;width:8px;height:8px;background:#a78bfa;border-radius:50%;margin:0 3px;animation:b 1s infinite}
-.typing-loader span:nth-child(2){animation-delay:.15s}.typing-loader span:nth-child(3){animation-delay:.3s}
-@keyframes b{0%,80%,100%{opacity:.4;transform:scale(.7)}40%{opacity:1;transform:scale(1.2)}}
-.composer-wrap{position:fixed;bottom:0;left:300px;right:0;background:#0f172a;border-top:1px solid #334155;padding:10px 14px calc(10px + env(safe-area-inset-bottom));z-index:20}
-.composer{max-width:930px;margin:auto;display:flex;gap:8px;background:#1e293b;border:1px solid #334155;border-radius:22px;padding:8px}
-#messageInput{flex:1;background:transparent;border:0;outline:0;color:white;font-size:16px;padding:0 8px}
-.icon-btn,.send-btn,.stop-btn{border:0;width:48px;height:48px;border-radius:17px;color:white;font-size:20px;font-weight:900}
-.icon-btn{background:#1e3a8a}.stop-btn{display:none;background:#ef4444}.mic-on{background:#ef4444!important}
-.note{text-align:center;color:#64748b;font-size:12px;margin-top:6px}
-.modal-backdrop{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;z-index:80;padding:15px}
-.modal-backdrop.active{display:flex}
-.modal{width:100%;max-width:480px;background:#111827;border:1px solid #334155;border-radius:24px;padding:22px}
-.modal h2{font-size:28px;margin-bottom:16px}
-.field{margin-bottom:13px}.field label{display:block;margin-bottom:6px;font-weight:900;color:#cbd5e1}
-.field input,.field textarea,.field select{width:100%;background:#020617;color:white;border:1px solid #334155;border-radius:14px;padding:13px}
-.field textarea{height:90px}
-.modal-actions{display:flex;gap:10px;justify-content:flex-end}
-.btn{border:0;padding:12px 18px;border-radius:14px;font-weight:900}.btn-secondary{background:#334155;color:white}.btn-primary{background:#2563eb;color:white}
-.light{background:#f8fafc;color:#111827}.light .app,.light .main,.light .topbar,.light .composer-wrap{background:#f8fafc;color:#111827}.light .sidebar{background:#eef3f9}.light .bubble{background:white;color:#111827}.light .composer,.light .tool-btn{background:white;color:#111827}.light #messageInput,.light .search-box{color:#111827;background:white}
-@media(max-width:760px){.sidebar{position:fixed;left:-310px;top:0;bottom:0;transition:left .25s}.sidebar.open{left:0}.menu-btn{display:block}.composer-wrap{left:0}.model-badge{display:none}.bubble-wrap{max-width:88%}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="description" content="FA AI CHAT BOT - Mobile-first AI Chatbot">
+    <title>FA AI CHAT BOT</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-<div class="app">
-<aside class="sidebar" id="sidebar">
-<div class="brand">FA AI CHAT BOT</div>
-<button class="new-chat" id="newChatBtn">+ New Chat</button>
-<input class="search-box" id="searchInput" placeholder="Search chats...">
-<div class="chat-tools"><button class="tool-btn" id="renameBtn">Rename</button><button class="tool-btn" id="clearBtn">Clear</button></div>
-<div class="chat-tools"><button class="tool-btn" id="exportBtn">Export TXT</button></div>
-<div class="chat-tools"><button class="tool-btn" id="backupBtn">Backup</button><button class="tool-btn" id="importBtn">Import</button></div>
-<input type="file" id="importFile" accept="application/json" hidden>
-<div class="chat-list" id="chatList"></div>
-<div class="side-bottom">
-<button class="side-action" id="settingsBtn">⚙️ Settings</button>
-<button class="side-action" id="themeBtn">☀️ Light / Dark</button>
-<button class="side-action" id="voiceToggleBtn">🔊 Auto Voice: OFF</button>
-<button class="side-action" id="stopVoiceBtn">🔇 Stop Voice</button>
-</div>
-</aside>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <button class="menu-toggle" id="menuToggle" aria-label="Open menu">
+                <span class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </span>
+            </button>
+            <h1 class="app-title">FA AI CHAT BOT</h1>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                <svg class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                </svg>
+            </button>
+        </div>
+    </header>
 
-<main class="main">
-<header class="topbar">
-<button class="menu-btn" id="menuBtn">☰</button>
-<div class="top-title">Universal AI Interface</div>
-<div class="model-badge" id="modelBadge">Model</div>
-</header>
+    <!-- Drawer Menu -->
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <nav class="drawer-menu" id="drawerMenu">
+        <div class="drawer-header">
+            <h2>Menu</h2>
+            <button class="drawer-close" id="drawerClose" aria-label="Close menu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <div class="drawer-body">
+            <button class="drawer-item new-chat-btn" id="newChatBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14"></path>
+                </svg>
+                <span>New Chat</span>
+            </button>
+            <button class="drawer-item clear-chat-btn" id="clearChatBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>
+                <span>Clear Chat</span>
+            </button>
+            <div class="drawer-divider"></div>
+            <div class="language-selector">
+                <label>Language</label>
+                <div class="language-buttons">
+                    <button class="lang-btn active" data-lang="en">English</button>
+                    <button class="lang-btn" data-lang="bn">বাংলা</button>
+                </div>
+            </div>
+            <div class="drawer-divider"></div>
+            <div class="drawer-footer">
+                <p class="version">Version 1.0</p>
+                <p class="credits">Phase 1 - UI Ready</p>
+            </div>
+        </div>
+    </nav>
 
-<section class="chat-area" id="chatArea"></section>
+    <!-- Main Chat Container -->
+    <main class="chat-container">
+        <div class="messages-area" id="messagesArea">
+            <div class="welcome-message">
+                <h2 id="welcomeTitle">Welcome to FA AI CHAT BOT</h2>
+                <p id="welcomeText">Start a conversation to begin</p>
+            </div>
+        </div>
+    </main>
 
-<div class="composer-wrap">
-<div class="composer">
-<button class="icon-btn" id="micBtn">🎤</button>
-<input id="messageInput" placeholder="Ask anything...">
-<button class="icon-btn" id="readLastBtn">🔊</button>
-<button class="send-btn" id="sendBtn">➤</button>
-<button class="stop-btn" id="stopBtn">■</button>
-</div>
-<div class="note">AI can make mistakes. Check important info.</div>
-</div>
-</main>
-</div>
+    <!-- Input Area -->
+    <div class="input-container">
+        <div class="input-wrapper">
+            <input 
+                type="text" 
+                class="message-input" 
+                id="messageInput" 
+                placeholder="Type your message..." 
+                autocomplete="off"
+            >
+            <button class="send-button" id="sendButton" aria-label="Send message">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M16.6915026,12.4744748 L3.50612381,13.2599618 C3.19218622,13.2599618 3.03521743,13.4170592 3.03521743,13.5741566 L1.15159189,20.0151496 C0.8376543,20.8006365 0.99,21.89 1.77946707,22.52 C2.41,22.99 3.50612381,23.1 4.13399899,22.99 L21.714504,14.0454487 C22.6563168,13.5741566 23.1272231,12.6315722 22.9702544,11.6889879 L4.13399899,1.16346272 C3.34915502,0.9 2.40734225,1.00636533 1.77946707,1.4776575 C0.994623095,2.10604706 0.837654326,3.0486314 1.15159189,3.99751086 L3.03521743,10.4385039 C3.03521743,10.5956013 3.19218622,10.7526988 3.50612381,10.7526988 L16.6915026,11.5381856 C16.6915026,11.5381856 17.1624089,11.5381856 17.1624089,12.0094777 C17.1624089,12.4807698 16.6915026,12.4744748 16.6915026,12.4744748 Z"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
 
-<div class="modal-backdrop" id="settingsModal">
-<div class="modal">
-<h2>⚙️ Settings</h2>
-<div class="field"><label>OpenRouter API Key</label><input id="apiKeyInput" type="password" placeholder="sk-or-..."></div>
-<div class="field"><label>Model ID</label><input id="modelInput" value="deepseek/deepseek-r1:free"></div>
-<div class="field"><label>System Prompt</label><textarea id="systemPromptInput">You are a helpful AI assistant.</textarea></div>
-<div class="field"><label>Voice Language</label><select id="voiceLangInput"><option value="bn-BD">Bengali</option><option value="en-US">English</option><option value="hi-IN">Hindi</option></select></div>
-<div class="field"><label>Voice Speed</label><input id="voiceRateInput" type="number" min="0.5" max="1.5" step="0.1" value="1"></div>
-<div class="modal-actions"><button class="btn btn-secondary" id="closeSettingsBtn">Cancel</button><button class="btn btn-primary" id="saveSettingsBtn">Save</button></div>
-</div>
-</div>
-
-<script>
-const STORAGE_CHATS="fa_ai_chats_floating_voice";
-const STORAGE_SETTINGS="fa_ai_settings_floating_voice";
-const STORAGE_THEME="fa_ai_theme_floating_voice";
-const STORAGE_AUTO_VOICE="fa_ai_auto_voice_floating_voice";
-
-let chats=[],currentChatId=null,isLoading=false,stopTyping=false,recognition=null,isListening=false;
-let autoVoice=localStorage.getItem(STORAGE_AUTO_VOICE)==="1";
-let speakingIndex=null;
-
-const $=id=>document.getElementById(id);
-const chatArea=$("chatArea"),chatList=$("chatList"),messageInput=$("messageInput"),sendBtn=$("sendBtn"),stopBtn=$("stopBtn"),micBtn=$("micBtn"),readLastBtn=$("readLastBtn"),sidebar=$("sidebar");
-const settingsModal=$("settingsModal"),apiKeyInput=$("apiKeyInput"),modelInput=$("modelInput"),systemPromptInput=$("systemPromptInput"),voiceLangInput=$("voiceLangInput"),voiceRateInput=$("voiceRateInput"),modelBadge=$("modelBadge");
-
-function uid(){return Date.now()+Math.random().toString(16)}
-function nowTime(){return new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}
-function getCurrentChat(){return chats.find(c=>c.id===currentChatId)}
-function saveChats(){localStorage.setItem(STORAGE_CHATS,JSON.stringify(chats))}
-function scrollBottom(){setTimeout(()=>chatArea.scrollTop=chatArea.scrollHeight,30)}
-function escapeHtml(t){return String(t).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[m]))}
-function markdownToHtml(t){let s=escapeHtml(t);s=s.replace(/```([\s\S]*?)```/g,(_,c)=>"<pre><code>"+c.trim()+"</code></pre>");s=s.replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>").replace(/`([^`]+)`/g,"<code>$1</code>").replace(/\n/g,"<br>");return s}
-
-function loadSettings(){
-let s=JSON.parse(localStorage.getItem(STORAGE_SETTINGS)||"{}");
-s={apiKey:s.apiKey||"",model:s.model||"deepseek/deepseek-r1:free",systemPrompt:s.systemPrompt||"You are a helpful AI assistant.",voiceLang:s.voiceLang||"bn-BD",voiceRate:s.voiceRate||1};
-apiKeyInput.value=s.apiKey;modelInput.value=s.model;systemPromptInput.value=s.systemPrompt;voiceLangInput.value=s.voiceLang;voiceRateInput.value=s.voiceRate;modelBadge.textContent=s.model.split("/").pop();return s;
-}
-
-function saveSettings(){
-localStorage.setItem(STORAGE_SETTINGS,JSON.stringify({
-apiKey:apiKeyInput.value.trim(),
-model:modelInput.value.trim()||"deepseek/deepseek-r1:free",
-systemPrompt:systemPromptInput.value.trim()||"You are a helpful AI assistant.",
-voiceLang:voiceLangInput.value,
-voiceRate:Number(voiceRateInput.value)||1
-}));
-settingsModal.classList.remove("active");
-loadSettings();
-alert("Settings saved.");
-}
-
-function createNewChat(){
-let c={id:uid(),title:"New Chat",messages:[]};
-chats.unshift(c);currentChatId=c.id;saveChats();renderAll();sidebar.classList.remove("open");
-}
-
-function loadChats(){
-chats=JSON.parse(localStorage.getItem(STORAGE_CHATS)||"[]");
-if(!chats.length)createNewChat();else{currentChatId=chats[0].id;renderAll()}
-}
-
-function titleFrom(t){return t.trim().slice(0,28)||"New Chat"}
-
-function renderChatList(){
-chatList.innerHTML="";
-let q=$("searchInput").value.toLowerCase();
-chats.filter(c=>!q||c.title.toLowerCase().includes(q)||c.messages.some(m=>m.content.toLowerCase().includes(q))).forEach(c=>{
-let d=document.createElement("div");
-d.className="chat-item"+(c.id===currentChatId?" active":"");
-d.innerHTML=`<span>${escapeHtml(c.title)}</span><button class="delete-btn">×</button>`;
-d.onclick=()=>{currentChatId=c.id;renderAll();sidebar.classList.remove("open")};
-d.querySelector("button").onclick=e=>{
-e.stopPropagation();
-if(!confirm("Delete this chat?"))return;
-chats=chats.filter(x=>x.id!==c.id);
-if(!chats.length){createNewChat();return}
-currentChatId=chats[0].id;saveChats();renderAll();
-};
-chatList.appendChild(d);
-});
-}
-
-function renderMessages(){
-let c=getCurrentChat();chatArea.innerHTML="";
-if(!c||!c.messages.length){
-chatArea.innerHTML='<div class="welcome"><div class="logo"></div><h1>Hello, User</h1><p>How can I help you today?</p></div>';
-return;
-}
-c.messages.forEach((m,i)=>{
-let div=document.createElement("div");
-div.className="message "+m.role;
-let content=m.content==="__LOADING__"?'<div class="typing-loader"><span></span><span></span><span></span></div>':(m.role==="assistant"?markdownToHtml(m.content):escapeHtml(m.content));
-let actions=m.content==="__LOADING__"?"":`<div class="msg-actions">${m.role==="assistant"?`<button data-copy="${i}">📋 Copy</button><button data-regen="${i}">↻ Regenerate</button><button class="floating-voice-btn ${speakingIndex===i?'speaking':''}" data-voice="${i}">${speakingIndex===i?'🔇':'🔊'}</button>`:`<button data-edit="${i}">✎ Edit</button>`}</div>`;
-div.innerHTML=`<div class="avatar">${m.role==="user"?"U":"AI"}</div><div class="bubble-wrap"><div class="bubble">${content}</div><div class="time">${m.time||""}</div>${actions}</div>`;
-chatArea.appendChild(div);
-});
-document.querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>navigator.clipboard.writeText(c.messages[b.dataset.copy].content));
-document.querySelectorAll("[data-voice]").forEach(b=>b.onclick=()=>toggleSpeak(Number(b.dataset.voice)));
-document.querySelectorAll("[data-regen]").forEach(b=>b.onclick=()=>regenerate(Number(b.dataset.regen)));
-document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>editMsg(Number(b.dataset.edit)));
-scrollBottom();
-}
-
-function renderAll(){renderChatList();renderMessages()}
-
-function addMessage(role,content){
-let c=getCurrentChat();
-c.messages.push({role,content,time:nowTime()});
-if(role==="user"&&c.title==="New Chat")c.title=titleFrom(content);
-saveChats();renderAll();
-}
-
-function setLoadingUI(state){
-isLoading=state;
-sendBtn.style.display=state?"none":"block";
-stopBtn.style.display=state?"block":"none";
-}
-
-async function sendMessage(){
-let text=messageInput.value.trim();
-if(!text||isLoading)return;
-let s=loadSettings();
-if(!s.apiKey){settingsModal.classList.add("active");alert("Add API key first.");return}
-addMessage("user",text);
-messageInput.value="";
-stopTyping=false;
-setLoadingUI(true);
-addMessage("assistant","__LOADING__");
-try{
-let reply=await callAI(s);
-await typeText(reply);
-}catch(e){
-let c=getCurrentChat();
-let last=c.messages[c.messages.length-1];
-last.content="Error: "+e.message;
-last.time=nowTime();
-saveChats();renderAll();
-}finally{
-setLoadingUI(false);
-}
-}
-
-async function typeText(text){
-let c=getCurrentChat();
-let m=c.messages[c.messages.length-1];
-m.content="";
-saveChats();renderMessages();
-
-for(let i=0;i<text.length;i++){
-if(stopTyping){
-m.content+="\n\n⛔ Response stopped.";
-break;
-}
-m.content+=text[i];
-if(i%3===0){saveChats();renderMessages()}
-await new Promise(r=>setTimeout(r,7));
-}
-saveChats();renderMessages();
-if(autoVoice&&!stopTyping){
-let index=getCurrentChat().messages.length-1;
-startSpeak(text,index);
-}
-}
-
-async function callAI(s){
-let c=getCurrentChat();
-let messages=[
-{role:"system",content:s.systemPrompt},
-...c.messages.filter(m=>m.content!=="__LOADING__").map(m=>({role:m.role,content:m.content}))
-];
-let r=await fetch("https://openrouter.ai/api/v1/chat/completions",{
-method:"POST",
-headers:{
-"Authorization":"Bearer "+s.apiKey,
-"Content-Type":"application/json",
-"HTTP-Referer":location.origin,
-"X-OpenRouter-Title":"FA AI Chat Bot"
-},
-body:JSON.stringify({model:s.model,messages,temperature:.7,max_tokens:1700})
-});
-let d=await r.json();
-if(!r.ok)throw new Error(d.error?.message||"API failed");
-return d.choices?.[0]?.message?.content||"No response.";
-}
-
-function regenerate(i){
-if(isLoading)return;
-let c=getCurrentChat(),u=-1;
-for(let x=i-1;x>=0;x--){if(c.messages[x].role==="user"){u=x;break}}
-if(u<0)return;
-c.messages=c.messages.slice(0,u+1);
-saveChats();renderAll();
-sendFromHistory();
-}
-
-async function sendFromHistory(){
-stopTyping=false;
-setLoadingUI(true);
-addMessage("assistant","__LOADING__");
-try{
-let reply=await callAI(loadSettings());
-await typeText(reply);
-}catch(e){
-let c=getCurrentChat();
-c.messages[c.messages.length-1].content="Error: "+e.message;
-saveChats();renderAll();
-}finally{setLoadingUI(false)}
-}
-
-function editMsg(i){
-if(isLoading)return;
-let c=getCurrentChat();
-let v=prompt("Edit message:",c.messages[i].content);
-if(!v||!v.trim())return;
-c.messages[i].content=v.trim();
-c.messages=c.messages.slice(0,i+1);
-saveChats();renderAll();
-sendFromHistory();
-}
-
-function cleanSpeak(t){
-return t.replace(/```[\s\S]*?```/g," code block omitted ").replace(/[#*_`>-]/g," ").replace(/\s+/g," ").trim();
-}
-
-function startSpeak(text,index){
-if(!("speechSynthesis" in window)){alert("Voice reply not supported.");return}
-let s=loadSettings();
-speechSynthesis.cancel();
-speakingIndex=index;
-renderMessages();
-
-let u=new SpeechSynthesisUtterance(cleanSpeak(text));
-u.lang=s.voiceLang;
-u.rate=Number(s.voiceRate)||1;
-u.pitch=1;
-
-u.onend=()=>{speakingIndex=null;renderMessages()};
-u.onerror=()=>{speakingIndex=null;renderMessages()};
-
-speechSynthesis.speak(u);
-}
-
-function stopSpeak(){
-speechSynthesis.cancel();
-speakingIndex=null;
-renderMessages();
-}
-
-function toggleSpeak(index){
-let c=getCurrentChat();
-let msg=c.messages[index];
-if(speakingIndex===index){
-stopSpeak();
-}else{
-startSpeak(msg.content,index);
-}
-}
-
-function speakLast(){
-let c=getCurrentChat();
-let lastIndex=-1;
-for(let i=c.messages.length-1;i>=0;i--){
-if(c.messages[i].role==="assistant"&&c.messages[i].content!=="__LOADING__"){
-lastIndex=i;
-break;
-}
-}
-if(lastIndex>=0)toggleSpeak(lastIndex);else alert("No AI reply.");
-}
-
-function setupVoice(){
-let SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-if(!SR){micBtn.onclick=()=>alert("Voice input not supported");return}
-recognition=new SR();
-recognition.interimResults=true;
-recognition.continuous=false;
-recognition.onstart=()=>{isListening=true;micBtn.classList.add("mic-on");micBtn.textContent="🔴"};
-recognition.onend=()=>{isListening=false;micBtn.classList.remove("mic-on");micBtn.textContent="🎤"};
-recognition.onresult=e=>{
-let t="";
-for(let i=e.resultIndex;i<e.results.length;i++)t+=e.results[i][0].transcript;
-messageInput.value=t;
-};
-micBtn.onclick=()=>{
-recognition.lang=loadSettings().voiceLang;
-if(isListening)recognition.stop();else recognition.start();
-};
-}
-
-function download(name,content,type){
-let b=new Blob([content],{type}),u=URL.createObjectURL(b),a=document.createElement("a");
-a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);
-}
-
-function updateVoiceBtn(){
-$("voiceToggleBtn").textContent=autoVoice?"🔊 Auto Voice: ON":"🔊 Auto Voice: OFF";
-}
-
-sendBtn.onclick=sendMessage;
-
-stopBtn.onclick=()=>{
-stopTyping=true;
-stopSpeak();
-let c=getCurrentChat();
-if(c&&c.messages.length){
-let last=c.messages[c.messages.length-1];
-if(last.role==="assistant"&&last.content==="__LOADING__"){
-last.content="⛔ Response stopped.";
-last.time=nowTime();
-saveChats();
-renderAll();
-}
-}
-setLoadingUI(false);
-};
-
-messageInput.onkeydown=e=>{if(e.key==="Enter")sendMessage()};
-$("menuBtn").onclick=()=>sidebar.classList.toggle("open");
-$("newChatBtn").onclick=createNewChat;
-$("settingsBtn").onclick=()=>{loadSettings();settingsModal.classList.add("active")};
-$("closeSettingsBtn").onclick=()=>settingsModal.classList.remove("active");
-$("saveSettingsBtn").onclick=saveSettings;
-$("themeBtn").onclick=()=>{document.body.classList.toggle("light");localStorage.setItem(STORAGE_THEME,document.body.classList.contains("light")?"light":"dark")};
-$("voiceToggleBtn").onclick=()=>{autoVoice=!autoVoice;localStorage.setItem(STORAGE_AUTO_VOICE,autoVoice?"1":"0");updateVoiceBtn()};
-$("stopVoiceBtn").onclick=stopSpeak;
-readLastBtn.onclick=speakLast;
-$("renameBtn").onclick=()=>{let c=getCurrentChat(),n=prompt("New chat name:",c.title);if(n&&n.trim()){c.title=n.trim();saveChats();renderAll()}};
-$("clearBtn").onclick=()=>{if(!confirm("Clear current chat?"))return;let c=getCurrentChat();c.messages=[];c.title="New Chat";saveChats();renderAll()};
-$("exportBtn").onclick=()=>{let c=getCurrentChat();download(c.title+".txt",JSON.stringify(c.messages,null,2),"text/plain")};
-$("backupBtn").onclick=()=>download("fa-ai-chat-backup.json",JSON.stringify({chats},null,2),"application/json");
-$("importBtn").onclick=()=>$("importFile").click();
-$("importFile").onchange=e=>{
-let f=e.target.files[0];if(!f)return;
-let r=new FileReader();
-r.onload=()=>{
-let d=JSON.parse(r.result);
-chats=d.chats||[];
-currentChatId=chats[0]?.id;
-if(!currentChatId)createNewChat();else{saveChats();renderAll()}
-};
-r.readAsText(f);
-};
-$("searchInput").oninput=renderChatList;
-
-if(localStorage.getItem(STORAGE_THEME)==="light")document.body.classList.add("light");
-loadSettings();
-updateVoiceBtn();
-loadChats();
-setupVoice();
-
-if("serviceWorker" in navigator){
-navigator.serviceWorker.register("./sw.js").catch(()=>{});
-}
-</script>
+    <script src="script.js"></script>
 </body>
 </html>
