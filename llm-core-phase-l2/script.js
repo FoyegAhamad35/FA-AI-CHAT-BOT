@@ -301,7 +301,7 @@ function responseEngine(userMessage, intent, language) {
         }
         // No memory found
         if (language === "bn") {
-            return "এই চ্যাটে আপনি এখনো এই তথ্য বলেননি।";
+            return "এই চ্য��টে আপনি এখনো এই তথ্য বলেননি।";
         } else {
             return "You have not shared that information in this chat yet.";
         }
