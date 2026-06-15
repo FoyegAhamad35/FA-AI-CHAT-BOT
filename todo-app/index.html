@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="description" content="To-Do List - Simple Task Management App">
+    <title>To-Do List</title>
+    <link rel="stylesheet" href="todo-style.css">
+</head>
+<body>
+    <!-- Main Container -->
+    <div class="todo-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="app-title">📋 To-Do List</h1>
+                <div class="header-actions">
+                    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme" title="Toggle theme">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                    </button>
+                    <button class="menu-btn" id="menuBtn" aria-label="Open menu" title="Menu">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <circle cx="6" cy="12" r="2"></circle>
+                            <circle cx="12" cy="12" r="2"></circle>
+                            <circle cx="18" cy="12" r="2"></circle>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Menu Dropdown -->
+        <div class="menu-dropdown" id="menuDropdown">
+            <button class="menu-item" id="viewAllBtn">👁️ View All</button>
+            <button class="menu-item" id="viewActiveBtn">⭕ Active Tasks</button>
+            <button class="menu-item" id="viewCompletedBtn">✅ Completed Tasks</button>
+            <div class="menu-divider"></div>
+            <button class="menu-item" id="sortBtn">🔄 Sort A-Z</button>
+            <button class="menu-item" id="clearCompletedBtn">🗑️ Clear Completed</button>
+            <button class="menu-item" id="clearAllBtn">⚠️ Clear All</button>
+            <div class="menu-divider"></div>
+            <button class="menu-item" id="exportBtn">📥 Export Tasks</button>
+            <button class="menu-item" id="importBtn">📤 Import Tasks</button>
+            <input type="file" id="importFile" accept="application/json" hidden>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat">
+                <span class="stat-label">Total:</span>
+                <span class="stat-value" id="totalCount">0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Active:</span>
+                <span class="stat-value active-stat" id="activeCount">0</span>
+            </div>
+            <div class="stat">
+                <span class="stat-label">Completed:</span>
+                <span class="stat-value completed-stat" id="completedCount">0</span>
+            </div>
+        </div>
+
+        <!-- Input Section -->
+        <div class="input-section">
+            <div class="input-wrapper">
+                <input 
+                    type="text" 
+                    id="taskInput" 
+                    class="task-input" 
+                    placeholder="Add a new task..." 
+                    autocomplete="off"
+                >
+                <button class="add-btn" id="addBtn" title="Add task">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"></path>
+                    </svg>
+                    Add
+                </button>
+            </div>
+            <div class="input-helpers">
+                <button class="helper-btn" id="priorityToggle" title="Set priority">
+                    <span class="priority-indicator">🔵</span>
+                    <span>Normal</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Task List -->
+        <div class="tasks-section">
+            <div class="tasks-list" id="tasksList">
+                <div class="empty-state">
+                    <div class="empty-icon">📝</div>
+                    <p>No tasks yet. Add one to get started!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty State Message -->
+        <div class="completion-message" id="completionMessage" style="display: none;">
+            <div class="completion-content">
+                <div class="completion-icon">🎉</div>
+                <p>All tasks completed!</p>
+                <p class="completion-subtext">Great job! Take a break or add more tasks.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="todo-script.js"></script>
+</body>
+</html>
